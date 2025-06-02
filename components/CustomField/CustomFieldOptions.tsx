@@ -6,6 +6,10 @@ import {
   DragEndEvent,
   DragOverlay,
   DragStartEvent,
+  TouchSensor,
+  useSensor,
+  useSensors,
+  MouseSensor,
 } from "@dnd-kit/core";
 import {
   arrayMove,
@@ -26,6 +30,7 @@ interface Props {
   embeddedCreateOptionEle?: ReactNode;
   hiddenDescription?: boolean;
 }
+
 export const CustomFieldOptions = ({
   field,
   title,
@@ -45,6 +50,15 @@ export const CustomFieldOptions = ({
       setActiveOption(e.active.data.current?.option);
     }
   };
+  const sensors = useSensors(
+    useSensor(MouseSensor),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 250,
+        tolerance: 5,
+      },
+    })
+  );
 
   const onDragEnd = (e: DragEndEvent) => {
     setActiveOption(null);
@@ -100,7 +114,11 @@ export const CustomFieldOptions = ({
             </p>
           )}
           <div className="border rounded-sm">
-            <DndContext onDragStart={onDragStart} onDragEnd={onDragEnd}>
+            <DndContext
+              sensors={sensors}
+              onDragStart={onDragStart}
+              onDragEnd={onDragEnd}
+            >
               <SortableContext
                 items={options.map((item) => item.id)}
                 strategy={verticalListSortingStrategy}

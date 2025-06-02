@@ -1,3 +1,4 @@
+"use client";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -24,6 +25,12 @@ import {
   defaultLabels,
 } from "@/consts/default-options";
 import { Plus } from "lucide-react";
+import { CreateOrEditLabelForm } from "@/components/Label/CreateOrEditLabelForm";
+import { LabelList } from "@/components/Label/LabelList";
+import { createClient } from "@/utils/supabase/client";
+import { toast } from "sonner";
+import { projects } from "@/utils/projects";
+import { useRouter } from "next/navigation";
 
 interface Props {
   projectDetails: {
@@ -34,10 +41,14 @@ interface Props {
 }
 export const CreateProjectModal = ({ projectDetails }: Props) => {
   const { isModalOpen, openModal, closeModal } = useModalDialog();
+  const router = useRouter();
   const [statuses, setStatuses] = useState(defaultStatuses);
   const [sizes, setSizes] = useState(defaultSizes);
   const [priorities, setPriorities] = useState(defaultPriorities);
-  const [label, setLabel] = useState(defaultLabels);
+  const [labels, setLabels] = useState(defaultLabels);
+  const [showNewLabelCard, setShowNewLabelCard] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+  const [skipDefaultOptions, setSkipDefaultOptions] = useState(false);
 
   const handleAddNewOptionItem = (
     data: Omit<ICustomFieldData, "id">,
@@ -55,6 +66,56 @@ export const CreateProjectModal = ({ projectDetails }: Props) => {
         break;
       default:
         break;
+    }
+  };
+
+  const handleAddNewLabelItem = (data: ICustomFieldData) => {
+    setLabels([...labels, data]);
+    setShowNewLabelCard(false);
+  };
+
+  const handleRemoveLabelItem = (id: string) => {
+    setLabels(labels.filter((item) => item.id !== id));
+  };
+
+  const handleCreateProject = async () => {
+    try {
+      setIsCreating(true);
+      const supabase = createClient();
+
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session) throw new Error("Not authenticated");
+
+      const projectData = {
+        ...projectDetails,
+        ...(skipDefaultOptions
+          ? {}
+          : {
+              statuses,
+              sizes,
+              priorities,
+              labels,
+            }),
+      };
+
+      const project = await projects.management.create(
+        projectData as ProjectWithOptions,
+        session.user.id
+      );
+      toast.success("Project created successfully.");
+      closeModal();
+      router.push(`/projects/${project.id}`);
+    } catch (error) {
+      console.error("Error creating project:", error);
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Failed to create project. Please try again."
+      );
+    } finally {
+      setIsCreating(false);
     }
   };
 
@@ -143,15 +204,49 @@ export const CreateProjectModal = ({ projectDetails }: Props) => {
               />
             }
           />
+          <div>
+            <div className="flex justify-between items-center">
+              <h1 className="text-lg py-3">Labels</h1>
+              <Button
+                onClick={() => setShowNewLabelCard(true)}
+                className={cn(secondaryBtnStyles, "h-7 px-2 rounded-sm mr-2")}
+              >
+                <Plus className="w-4 h-4 mr-1" />
+                New
+              </Button>
+            </div>
+            {showNewLabelCard && (
+              <CreateOrEditLabelForm
+                save={(data) => handleAddNewLabelItem(data)}
+                cancel={() => setShowNewLabelCard(false)}
+              />
+            )}
+            <div className="rounded border">
+              <LabelList
+                labels={labels}
+                hiddenDescription
+                onLabelDeleted={handleRemoveLabelItem}
+              />
+            </div>
+          </div>
         </div>
 
         <div className="flex gap-2 pt-4">
-          <Checkbox />
+          <Checkbox
+            checked={skipDefaultOptions}
+            onClick={() => setSkipDefaultOptions(!skipDefaultOptions)}
+          />
           <Label>Skip Default options. I will create my own options</Label>
         </div>
         <DialogFooter>
           <div className="flex justify-end">
-            <Button className={cn(successBtnStyles, "w-28")}>Create</Button>
+            <Button
+              onClick={handleCreateProject}
+              className={cn(successBtnStyles, "w-28")}
+              disabled={isCreating}
+            >
+              {isCreating ? "Creating ..." : "Create"}
+            </Button>
           </div>
         </DialogFooter>
       </DialogContent>

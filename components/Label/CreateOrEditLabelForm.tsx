@@ -1,24 +1,24 @@
-'use client';
-import { secondaryBtnStyles, successBtnStyles } from '@/app/commonStyles';
-import { cn } from '@/lib/utils';
-import { Check, RefreshCcw } from 'lucide-react';
-import { useState } from 'react';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+"use client";
+import { secondaryBtnStyles, successBtnStyles } from "@/app/commonStyles";
+import { cn } from "@/lib/utils";
+import { Check, RefreshCcw } from "lucide-react";
+import { useState } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from '@/components/ui/popover';
-import { labelColors } from '@/consts/colors';
+} from "@/components/ui/popover";
+import { labelColors } from "@/consts/colors";
 
 const defaultColor = labelColors[1];
 
 interface Props {
-  mode?: 'create' | 'edit';
+  mode?: "create" | "edit";
   data?: ICustomFieldData;
   save?: (data: ICustomFieldData) => void;
   cancel?: () => void;
@@ -26,14 +26,14 @@ interface Props {
 }
 
 export const CreateOrEditLabelForm = ({
-  mode = 'create',
+  mode = "create",
   data,
   cancel,
   save,
   isSubmitting,
 }: Props) => {
-  const [labelName, setLabelName] = useState(data?.label || '');
-  const [description, setDescription] = useState(data?.description || '');
+  const [labelName, setLabelName] = useState(data?.label || "");
+  const [description, setDescription] = useState(data?.description || "");
   const [color, setColor] = useState(data?.color || defaultColor);
 
   function isValidHexColor(code: string) {
@@ -49,7 +49,7 @@ export const CreateOrEditLabelForm = ({
   return (
     <Card className="p-6 mb-6 bg-muted dark:bg-muted/20">
       <Badge className="py-1 px-4 mb-8 " style={{ backgroundColor: color }}>
-        <span className="text-white">{labelName || 'Label preview'}</span>
+        <span className="text-white">{labelName || "Label preview"}</span>
       </Badge>
       <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4 flex-wrap">
         <div className="flex flex-col lg:flex-row gap-6">
@@ -76,7 +76,7 @@ export const CreateOrEditLabelForm = ({
             <Label>Color</Label>
             <div className="flex items-center gap-2">
               <Button
-                className={cn('px-3 h-8 text-white')}
+                className={cn("px-3 h-8 text-white")}
                 style={{ backgroundColor: color }}
                 onClick={selectRandomColor}
               >
@@ -90,8 +90,8 @@ export const CreateOrEditLabelForm = ({
                     onChange={(e) => setColor(e.currentTarget.value)}
                     className={`lg:w-[110px] h-8 ${
                       !isValidHexColor(color)
-                        ? 'focus:ring-red-500 focus:outline-red-500'
-                        : ''
+                        ? "focus:ring-red-500 focus:outline-red-500"
+                        : ""
                     }`}
                   />
                 </PopoverTrigger>
@@ -121,7 +121,7 @@ export const CreateOrEditLabelForm = ({
           <Button
             onClick={() =>
               save?.({
-                id: mode === 'edit' ? data?.id! : crypto.randomUUID(),
+                id: mode === "edit" ? data?.id! : crypto.randomUUID(),
                 label: labelName,
                 description,
                 color,
@@ -133,10 +133,10 @@ export const CreateOrEditLabelForm = ({
             }
           >
             {isSubmitting
-              ? 'Submitting...'
-              : mode === 'edit'
-              ? 'Update label'
-              : 'Create label'}
+              ? "Submitting..."
+              : mode === "edit"
+              ? "Update label"
+              : "Create label"}
           </Button>
         </div>
       </div>

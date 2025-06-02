@@ -29,18 +29,24 @@ export const ProjectTabs = ({
   setProjectToDelete,
 }: ProjectTabsProps) => (
   <Tabs defaultValue="active-projects">
-    <TabsList className="bg-slate-100 dark:bg-slate-900 rounded-none">
+    <TabsList className="bg-slate-100 dark:bg-slate-900 rounded-none w-full">
       <TabsTrigger value="active-projects">
         <PanelsTopLeft className="w-4 h-4 mr-2" />
-        <span>Active Projects</span>
+        <span>
+          Active <span className="hidden sm:inline">Projects</span>
+        </span>
       </TabsTrigger>
       <TabsTrigger value="closed-projects">
         <SquareKanban className="w-4 h-4 mr-2" />
-        <span>Closed Projects</span>
+        <span>
+          Closed <span className="hidden sm:inline">Projects</span>
+        </span>
       </TabsTrigger>
       <TabsTrigger value="all-projects">
         <SquareKanban className="w-4 h-4 mr-2" />
-        <span>All Projects</span>
+        <span>
+          All <span className="hidden sm:inline">Projects</span>
+        </span>
       </TabsTrigger>
     </TabsList>
 
