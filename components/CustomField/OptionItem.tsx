@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 import { CustomFieldTagRenderer } from "../CustomFieldTagRenderer";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Dispatch, SetStateAction, useState } from "react";
+import { Dispatch, SetStateAction } from "react";
 import { CustomOptionForm } from "./CustomOptionForm";
 import { Button } from "../ui/button";
 import { secondaryBtnStyles } from "@/app/commonStyles";
@@ -54,31 +54,22 @@ export const OptionItem = ({
     },
   });
 
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-
   const style = {
     transform: CSS.Translate.toString(transform),
     transition,
   };
 
   const handleUpdateOption = (updatedItem: ICustomFieldData) => {
-    if (typeof updateOption === "function") {
-      updateOption(updatedItem);
-    }
-
+    updateOption?.(updatedItem);
     closeModal();
     setOptionId(undefined);
   };
 
   const handleDeleteItem = (id: string) => {
-    if (typeof deleteOption === "function") {
-      deleteOption(id);
-    }
+    deleteOption?.(id);
   };
 
-  const isModalCurrentlyOpen = item.id === selectedOptionId;
-
-  const isAnyModalOpen = selectedOptionId !== undefined;
+  const isModalOpen = selectedOptionId === item.id;
 
   if (isDragging) {
     return (
@@ -111,43 +102,29 @@ export const OptionItem = ({
             </div>
           )}
         </div>
-        {!isAnyModalOpen && (
-          <DropdownMenu
-            open={dropdownOpen}
-            onOpenChange={(open) => {
-              setDropdownOpen(open);
-              if (!open) {
-                requestAnimationFrame(() => {
-                  if (document.activeElement instanceof HTMLElement) {
-                    document.activeElement.blur();
-                  }
-                });
-              }
-            }}
-          >
-            <DropdownMenuTrigger>
-              <Ellipsis className="w-5 h-5 text-gray-400 dark:text-gray-600" />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuItem
-                onClick={() => {
-                  setOptionId(item.id);
-                  openModal();
-                  setDropdownOpen(false);
-                }}
-              >
-                <span>Edit</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleDeleteItem(item.id)}>
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        )}
+
+        <DropdownMenu>
+          <DropdownMenuTrigger>
+            <Ellipsis className="w-5 h-5 text-gray-400 dark:text-gray-600" />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuItem
+              onClick={() => {
+                setOptionId(item.id);
+                openModal();
+              }}
+            >
+              Edit
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleDeleteItem(item.id)}>
+              Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       <Dialog
-        open={isModalCurrentlyOpen}
+        open={isModalOpen}
         onOpenChange={(open) => {
           if (!open) {
             closeModal();
