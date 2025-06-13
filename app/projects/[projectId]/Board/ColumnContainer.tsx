@@ -22,11 +22,17 @@ interface Props {
   projectName: string;
   tasks: ITaskWithOptions[];
   column: IStatus;
+  onColumnHide?: (columnId: string) => void;
+  onColumnUpdate?: (column: IStatus) => void;
+  onColumnDelete?: (columnId: string) => void;
 }
 export const ColumnContainer = ({
   column,
   tasks: columnTasks,
   projectName,
+  onColumnHide,
+  onColumnUpdate,
+  onColumnDelete,
 }: Props) => {
   const [showInput, setShowInput] = useState(false);
   const [inputValue, setInputValue] = useState("");
@@ -77,7 +83,12 @@ export const ColumnContainer = ({
             </TooltipProvider>
           </div>
 
-          <ColumnMenuOptions column={column} />
+          <ColumnMenuOptions
+            column={column}
+            onColumnHide={onColumnHide}
+            onColumnDelete={onColumnDelete}
+            onColumnUpdate={onColumnUpdate}
+          />
         </div>
         <div className="text-sx text-gray-500 dark:text-gray-400">
           {column.description}

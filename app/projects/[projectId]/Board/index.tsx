@@ -4,8 +4,11 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Eye, Plus } from "lucide-react";
 import { ColumnContainer } from "./ColumnContainer";
+import { columns as columnsUtils } from "@/utils/columns";
 import { CreateOrEditCustomFieldOptionModal } from "@/components/CustomField/CreateCustomFieldOptionModal";
 import { secondaryBtnStyles } from "@/app/commonStyles";
+import { useState } from "react";
+import { toast } from "sonner";
 
 interface Props {
   projectId: string;
@@ -17,31 +20,82 @@ export const Board: React.FC<Props> = ({
   projectName,
   statuses,
 }) => {
+  const [columns, setColumns] = useState(statuses);
+  const [hiddenColumns, setHiddenColumns] = useState<Set<string>>(new Set());
+  const [isLoading, setIsLoading] = useState(false);
+
   const handleCreateColumn = async (data: Omit<ICustomFieldData, "id">) => {
-    console.log(data);
+    try {
+      setIsLoading(true);
+      const newColumn = await columnsUtils.createColumn(projectId, data);
+      setColumns((prev) => [...prev, newColumn]);
+      toast.success("Column created successfully.");
+    } catch (error) {
+      console.error("Error creating column:", error);
+      toast.error("Failed to create column. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
+
+  const handleColumnHide = (columnId: string) => {
+    setHiddenColumns((prev) => new Set([...prev, columnId]));
+  };
+
+  const handleColumnUpdate = (updatedColumn: IStatus) => {
+    setColumns((prev) =>
+      prev.map((status) =>
+        status.id === updatedColumn.id ? updatedColumn : status
+      )
+    );
+  };
+
+  const handleColumnDelete = (columnId: string) => {
+    setColumns((prev) => prev.filter((status) => status.id !== columnId));
+  };
+
+  const handleShowHiddenColumns = () => {
+    setHiddenColumns(new Set());
+  };
+
+  const visibleColumns = columns.filter(
+    (column) => !hiddenColumns.has(column.id)
+  );
+
   return (
     <div className="h-[calc(100vh-200px)]">
       <div className="py-1">
-        <Button
-          variant="outline"
-          size="sm"
-          className="h-7 px-2 text-xs gap-1.5"
-          onClick={() => {}}
-        >
-          <Eye className="w-4 h-4 mr-2" />
-          Show hiddencolumns (0)
-        </Button>
+        {hiddenColumns.size > 0 && (
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-7 px-2 text-xs gap-1.5"
+            onClick={handleShowHiddenColumns}
+          >
+            <Eye className="w-4 h-4 mr-2" />
+            Show hiddencolumns ({hiddenColumns.size})
+          </Button>
+        )}
       </div>
       <div className="flex gap-1 w-full overflow-x-auto py-1">
-        <div className={cn("flex gap-3", "h-[calc(100vh-175px)]")}>
-          {statuses.map((status) => (
+        <div
+          className={cn(
+            "flex gap-3",
+            hiddenColumns.size > 0
+              ? "h-[calc(100vh-175px)]"
+              : "h-[calc(100vh-155px)]"
+          )}
+        >
+          {visibleColumns.map((status) => (
             <ColumnContainer
               key={status.id}
               column={status}
               tasks={[]}
               projectId={projectId}
               projectName={projectName}
+              onColumnHide={handleColumnHide}
+              onColumnUpdate={handleColumnUpdate}
+              onColumnDelete={handleColumnDelete}
             />
           ))}
         </div>
@@ -49,7 +103,10 @@ export const Board: React.FC<Props> = ({
           title="New Column"
           handleSubmit={handleCreateColumn}
           triggerBtn={
-            <Button className={cn(secondaryBtnStyles, "w-8 h-8 p-2 mr-4")}>
+            <Button
+              className={cn(secondaryBtnStyles, "w-8 h-8 p-2 mr-4")}
+              disabled={isLoading}
+            >
               <Plus />
             </Button>
           }
