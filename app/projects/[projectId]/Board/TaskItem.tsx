@@ -43,7 +43,6 @@ export const TaskItem = ({ item, projectName }: Props) => {
           ))}
         </div>
       </div>
-      ;
     </>
   );
 };

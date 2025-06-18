@@ -8,6 +8,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { ColumnMenuOptions } from "./ColumnMenuOptions";
+import { tasks as taskUtils } from "@/utils/tasks";
 import { SortableContext } from "@dnd-kit/sortable";
 import { cn } from "@/lib/utils";
 import { UniqueIdentifier } from "@dnd-kit/core";
@@ -16,6 +17,10 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { successBtnStyles } from "@/app/commonStyles";
 import { Plus, X } from "lucide-react";
+import { getLowestColumnPosition } from "@/utils/sort";
+import { toast } from "sonner";
+import { useAccessStore } from "@/stores/useAccessStore";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 interface Props {
   projectId: string;
@@ -25,7 +30,10 @@ interface Props {
   onColumnHide?: (columnId: string) => void;
   onColumnUpdate?: (column: IStatus) => void;
   onColumnDelete?: (columnId: string) => void;
+  onTaskCreated?: (task: ITaskWithOptions) => void;
+  hasMinRole: (role: Role) => boolean;
 }
+
 export const ColumnContainer = ({
   column,
   tasks: columnTasks,
@@ -33,10 +41,47 @@ export const ColumnContainer = ({
   onColumnHide,
   onColumnUpdate,
   onColumnDelete,
+  onTaskCreated,
+  projectId,
+  hasMinRole,
 }: Props) => {
   const [showInput, setShowInput] = useState(false);
   const [inputValue, setInputValue] = useState("");
-  const handleAddItem = () => {};
+  const [isCreating, setIsCreating] = useState(false);
+  const { user } = useCurrentUser();
+
+  const userRole = useAccessStore((state) => state.roles[projectId]);
+
+  const handleAddItem = async () => {
+    if (!inputValue.trim() || isCreating || !user) return;
+
+    try {
+      setIsCreating(true);
+
+      // Get lowest position as the new position and place it at the bottom
+      const newPosition = getLowestColumnPosition(columnTasks);
+
+      const task = await taskUtils.create({
+        project_id: projectId,
+        status_id: column.id,
+        title: inputValue.trim(),
+        description: "",
+        created_by: user.id,
+        statusPosition: newPosition,
+      });
+
+      toast.success("Task created successfully.");
+
+      onTaskCreated?.({ ...task, assignees: [] });
+      setInputValue("");
+      setShowInput(false);
+    } catch (error) {
+      console.error("Error creating task:", error);
+      toast.error("Failed to create task. Please try again.");
+    } finally {
+      setIsCreating(false);
+    }
+  };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
@@ -48,7 +93,7 @@ export const ColumnContainer = ({
   };
 
   return (
-    <div className="w-[350px] overflow-x-hidden h-full flex-shrink-0 bg-gray-100 dark:bg-gray-950 rounded-md border border-gray-200 dark:border-gray-800">
+    <div className="w-[350px] overflow-x-hidden h-full flex-shrink-0 bg-gray-100 dark:bg-gray-950 rounded-md border border-gray-200 dark:border-gray-800 flex flex-col">
       <div className="p-2 space-y-1 flex-shrink-0">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-2">
@@ -84,10 +129,13 @@ export const ColumnContainer = ({
           </div>
 
           <ColumnMenuOptions
+            projectId={projectId}
             column={column}
             onColumnHide={onColumnHide}
+            userRole={userRole}
             onColumnDelete={onColumnDelete}
             onColumnUpdate={onColumnUpdate}
+            hasMinRole={hasMinRole}
           />
         </div>
         <div className="text-sx text-gray-500 dark:text-gray-400">
@@ -116,40 +164,45 @@ export const ColumnContainer = ({
       </SortableContext>
 
       {/* Add task Section */}
-      <div className="p-2 dark:border-gray-800">
-        {showInput ? (
-          <div className="flex gap-2">
-            <Input
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Enter task title..."
-              className="h-8"
-              autoFocus
-            />
+      {hasMinRole("write") && (
+        <div className="p-2 dark:border-gray-800">
+          {showInput ? (
+            <div className="flex gap-2">
+              <Input
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Enter task title..."
+                className="h-8"
+                autoFocus
+              />
+              <Button
+                onClick={handleAddItem}
+                className={cn(successBtnStyles, "h-8 px-3")}
+                disabled={!inputValue.trim() || isCreating}
+              >
+                Add
+              </Button>
+              <Button
+                onClick={() => {
+                  setShowInput(false);
+                  setInputValue("");
+                }}
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+          ) : (
             <Button
-              onClick={handleAddItem}
-              className={cn(successBtnStyles, "h-8 px-3")}
-              disabled={!inputValue.trim()}
+              onClick={() => setShowInput(true)}
+              className="w-full h-8 bg-transparent text-gray-500 hover:bg-gray-200 hover:dark:bg-gray-900 dark:text-gray-400 flex justify-start "
             >
-              Add
+              <Plus className="w-4 h-4 mr-2" />
+              Add Item
             </Button>
-            <Button
-              onClick={() => {
-                setShowInput(false);
-                setInputValue("");
-              }}
-            >
-              <X className="w-4 h-4" />
-            </Button>
-          </div>
-        ) : (
-          <Button onClick={() => setShowInput(true)} className="w-full ">
-            <Plus className="w-4 h-4 mr-2" />
-            Add Task
-          </Button>
-        )}
-      </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };

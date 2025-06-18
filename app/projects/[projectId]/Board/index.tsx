@@ -7,22 +7,39 @@ import { ColumnContainer } from "./ColumnContainer";
 import { columns as columnsUtils } from "@/utils/columns";
 import { CreateOrEditCustomFieldOptionModal } from "@/components/CustomField/CreateCustomFieldOptionModal";
 import { secondaryBtnStyles } from "@/app/commonStyles";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { useProjectQueries } from "@/hooks/useProjectQueries";
+import { getColumnSortedTasks, sortTasks } from "@/utils/sort";
 
 interface Props {
   projectId: string;
   projectName: string;
   statuses: IStatus[];
+  hasMinRole: (role: Role) => boolean;
 }
 export const Board: React.FC<Props> = ({
   projectId,
   projectName,
   statuses,
+  hasMinRole,
 }) => {
   const [columns, setColumns] = useState(statuses);
   const [hiddenColumns, setHiddenColumns] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(false);
+  const { projectTasks } = useProjectQueries(projectId);
+
+  const [tasks, setTasks] = useState<ITaskWithOptions[]>(projectTasks || []);
+
+  useEffect(() => {
+    setTasks(projectTasks || []);
+  }, [projectTasks]);
+
+  const sortedTasks = sortTasks(tasks);
+
+  const getColumnTasks = (statusId: string) => {
+    return getColumnSortedTasks(sortedTasks, statusId);
+  };
 
   const handleCreateColumn = async (data: Omit<ICustomFieldData, "id">) => {
     try {
@@ -36,6 +53,10 @@ export const Board: React.FC<Props> = ({
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleTaskCreated = (newTask: ITaskWithOptions) => {
+    setTasks((prev) => [...prev, newTask]);
   };
 
   const handleColumnHide = (columnId: string) => {
@@ -90,12 +111,14 @@ export const Board: React.FC<Props> = ({
             <ColumnContainer
               key={status.id}
               column={status}
-              tasks={[]}
+              tasks={getColumnTasks(status.id)}
               projectId={projectId}
               projectName={projectName}
               onColumnHide={handleColumnHide}
               onColumnUpdate={handleColumnUpdate}
               onColumnDelete={handleColumnDelete}
+              onTaskCreated={handleTaskCreated}
+              hasMinRole={hasMinRole}
             />
           ))}
         </div>

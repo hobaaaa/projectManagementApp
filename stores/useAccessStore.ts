@@ -1,6 +1,6 @@
-import { create } from 'zustand';
-import { createClient } from '@/utils/supabase/client';
-import { ProjectAction } from '@/consts';
+import { create } from "zustand";
+import { createClient } from "@/utils/supabase/client";
+import { ProjectAction } from "@/consts";
 
 interface AccessState {
   permissions: Record<string, Record<ProjectAction, boolean>>;
@@ -43,25 +43,25 @@ export const useAccessStore = create<AccessState>((set, get) => ({
 
     // Get project details
     const { data: project } = await supabase
-      .from('projects')
-      .select('created_by')
-      .eq('id', projectId)
+      .from("projects")
+      .select("created_by")
+      .eq("id", projectId)
       .maybeSingle();
 
     // Get member role
     const { data: member, error: memberError } = await supabase
-      .from('project_members')
-      .select('role')
-      .eq('project_id', projectId)
-      .eq('user_id', session.user.id)
+      .from("project_members")
+      .select("role")
+      .eq("project_id", projectId)
+      .eq("user_id", session.user.id)
       .maybeSingle();
 
     if (memberError) {
-      console.error('Error fetching member role:', memberError);
+      console.error("Error fetching member role:", memberError);
     }
 
     const isCreator = project?.created_by === session.user.id;
-    const role = isCreator ? 'owner' : member?.role || 'read';
+    const role = isCreator ? "owner" : member?.role || "read";
 
     // Define permissions based on role
     const permissions = calculatePermissions(role);

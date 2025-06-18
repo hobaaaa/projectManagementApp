@@ -4,11 +4,13 @@ import { Loader2, User } from "lucide-react";
 import { RoleSelect } from "./RoleSelect";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { emails } from "@/utils/emails";
 import { successBtnStyles } from "@/app/commonStyles";
 import { useState } from "react";
 import { useDebounce } from "@/hooks/useDebounce";
 import { toast } from "sonner";
 import { createClient } from "@/utils/supabase/client";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 interface Props {
   projectName: string;
@@ -32,6 +34,7 @@ export const InviteUsers = ({
   const [selectedUser, setSelectedUser] = useState<IUser | null>(null);
   const [role, setRole] = useState<Role>("read");
   const [isInviting, setIsInviting] = useState(false);
+  const { user } = useCurrentUser();
 
   const supabase = createClient();
 
@@ -88,7 +91,30 @@ export const InviteUsers = ({
 
       if (memberError) throw memberError;
 
+      const newMember = {
+        ...memberDetails,
+        user: selectedUser,
+      } as MemberWithUser;
+
       //send invitation email
+
+      await emails.sendProjectInvitation({
+        to: selectedUser.email,
+        projectId,
+        role,
+        username: selectedUser.name,
+        projectName,
+        invitedByUsername: user?.name || "",
+      });
+
+      onMemberAdded?.(newMember);
+
+      toast.success("Invitation sent successfully.");
+
+      //reset form
+      setSelectedUser(null);
+      setSearchTerm("");
+      setSearchResult([]);
     } catch (error) {
       console.error("Error inviting user:", error);
       toast.error("Failed to send invitation. Please try again.");
@@ -135,13 +161,13 @@ export const InviteUsers = ({
             </div>
           )}
         </div>
-        <RoleSelect value={role} onValueChange={() => {}} />
+        <RoleSelect value={role} onValueChange={setRole} />
         <Button
           onClick={handleInviteUser}
           disabled={!selectedUser || isInviting}
           className={cn(successBtnStyles, "px-3")}
         >
-          Invite
+          {isInviting ? "Inviting..." : "Invite"}
         </Button>
       </div>
     </div>
