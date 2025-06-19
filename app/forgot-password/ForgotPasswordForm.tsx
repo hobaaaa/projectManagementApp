@@ -17,6 +17,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { auth } from "@/utils/auth";
 import { Icons } from "@/components/Icons";
+import { AuthError } from "@supabase/supabase-js";
 
 export const ForgotPasswordForm = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -31,7 +32,7 @@ export const ForgotPasswordForm = () => {
       toast.success(response.message);
       router.push("/login");
     } catch (error) {
-      const { message } = getAuthError(error);
+      const { message } = getAuthError(error as AuthError);
       toast.error(message);
     } finally {
       setIsLoading(false);

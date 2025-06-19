@@ -18,6 +18,7 @@ import { toast } from "sonner";
 import { useState } from "react";
 import { getAuthError } from "@/utils/auth-errors";
 import { Icons } from "@/components/Icons";
+import { AuthError } from "@supabase/supabase-js";
 
 export const LoginForm = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -34,7 +35,7 @@ export const LoginForm = () => {
       router.refresh();
     } catch (error) {
       console.error("Auth error:", error);
-      const { message } = getAuthError(error);
+      const { message } = getAuthError(error as AuthError);
       toast.error(message);
     } finally {
       setIsLoading(false);
