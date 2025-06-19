@@ -121,7 +121,7 @@ export const CreateOrEditLabelForm = ({
           <Button
             onClick={() =>
               save?.({
-                id: mode === "edit" ? data?.id! : crypto.randomUUID(),
+                id: mode === "edit" && data?.id ? data.id : crypto.randomUUID(),
                 label: labelName,
                 description,
                 color,
@@ -135,8 +135,8 @@ export const CreateOrEditLabelForm = ({
             {isSubmitting
               ? "Submitting..."
               : mode === "edit"
-              ? "Update label"
-              : "Create label"}
+                ? "Update label"
+                : "Create label"}
           </Button>
         </div>
       </div>

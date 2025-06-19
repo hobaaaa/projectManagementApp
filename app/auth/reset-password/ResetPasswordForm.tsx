@@ -13,8 +13,9 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { auth, AuthError } from "@/utils/auth";
+import { auth } from "@/utils/auth";
 import { toast } from "sonner";
+import { AuthError } from "@supabase/supabase-js";
 
 export function ResetPasswordForm() {
   const [isLoading, setIsLoading] = useState(false);

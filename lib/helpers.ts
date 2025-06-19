@@ -27,8 +27,10 @@ export const getCustomFieldTagColorsForTheme = (
   )}`,
 });
 
+type GenericObject = Record<string, unknown>;
+
 export function getAllKeysExceptLabelKey(
-  data: any[],
+  data: GenericObject[],
   labelKey: string
 ): string[] {
   const keysSet = new Set<string>();
@@ -46,8 +48,7 @@ export function getAllKeysExceptLabelKey(
 
 type Identifiable = {
   id: string;
-  [key: string]: any;
-};
+} & Record<string, unknown>;
 
 export function compareArrays<T extends Identifiable>(
   arr1: T[],

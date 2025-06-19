@@ -1,7 +1,6 @@
 type ComparableItem = {
   id: string;
-  [key: string]: any;
-};
+} & Record<string, unknown>;
 
 export const compareAndUpdateItems = <T extends ComparableItem>(
   originalItems: T[],

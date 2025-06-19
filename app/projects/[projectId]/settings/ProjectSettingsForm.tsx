@@ -1,5 +1,4 @@
 "use client";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { Input } from "@/components/ui/input";
@@ -28,7 +27,6 @@ export const ProjectSettingsForm = ({ project }: ProjectSettingsFormProps) => {
     description: project.description,
     readme: project.readme,
   });
-  const router = useRouter();
 
   const handleUpdateProject = async () => {
     try {

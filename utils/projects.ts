@@ -182,7 +182,7 @@ export const projects = {
         .eq("project_id", projectId);
 
       if (error) throw error;
-      return (data as any[]).map((m) => m.user) as IUser[];
+      return data?.map((m) => m.user) ?? [];
     },
     getProjectOwner: async (projectId: string) => {
       const { data, error } = await supabase
@@ -207,18 +207,7 @@ export const projects = {
       if (error) throw error;
       if (!data?.creator) return null;
 
-      const creator = data.creator as Record<string, any>;
-
-      return {
-        id: creator.id,
-        name: creator.name,
-        email: creator.email,
-        avatar: creator.avatar,
-        description: creator.description,
-        links: creator.links,
-        created_at: creator.created_at,
-        updated_at: creator.updated_at,
-      } as IUser;
+      return data.creator as unknown as IUser;
     },
   },
 

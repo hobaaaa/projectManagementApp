@@ -10,10 +10,23 @@ export type AuthErrorType =
   | "DatabaseError"
   | "Default";
 
+type CustomError = Error & {
+  code?: string;
+  error_description?: string;
+  message?: string;
+};
+
 export const getAuthError = (
-  error: SupabaseAuthError | PostgrestError | any
+  error: SupabaseAuthError | PostgrestError | CustomError | null | undefined
 ): { type: AuthErrorType; message: string } => {
-  if (error?.code) {
+  if (!error) {
+    return {
+      type: "Default",
+      message: "An error occurred. Please try again.",
+    };
+  }
+
+  if ("code" in error) {
     switch (error.code) {
       case "23505":
       case "23503":
@@ -24,8 +37,7 @@ export const getAuthError = (
     }
   }
 
-  // Handle Supabase auth errors
-  if (error?.error_description) {
+  if ("error_description" in error && error.error_description) {
     const errorMessage = error.error_description.toLowerCase();
     if (errorMessage.includes("user already registered")) {
       return {
@@ -33,11 +45,9 @@ export const getAuthError = (
         message: "This email is already registered. Try signing in instead.",
       };
     }
-    // ... rest of the error handling
   }
 
-  // Handle error message directly
-  const errorMessage = error?.message?.toLowerCase() || "";
+  const errorMessage = ("message" in error ? error.message : "").toLowerCase();
 
   if (errorMessage.includes("invalid login credentials")) {
     return {

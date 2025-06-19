@@ -63,10 +63,13 @@ export const ProfilePhotoUploader: React.FC<ProfilePhotoUploaderProps> = ({
       toast.success("Success", {
         description: "Profile photo updated successfully.",
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error uploading file:", error);
+      const message =
+        error instanceof Error ? error.message : "An unknown error occurred";
+
       toast.error("Error uploading file", {
-        description: error.message,
+        description: message,
       });
     } finally {
       setIsUploading(false);

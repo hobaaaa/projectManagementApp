@@ -61,6 +61,7 @@ export const ProjectItem = ({
       {can(ProjectAction.CLOSE_PROJECT) && (
         <ProjectActions
           project={project}
+          anyDialogOpen
           tab={tab}
           setProjectToClose={setProjectToClose}
           setProjectToReopen={setProjectToReopen}

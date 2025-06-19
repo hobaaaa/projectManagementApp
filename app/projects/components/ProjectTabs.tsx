@@ -20,7 +20,6 @@ export const ProjectTabs = ({
   activeProjects,
   closedProjects,
   allProjects,
-  searchTerm,
   setSearchTerm,
   sortOrder,
   onSort,

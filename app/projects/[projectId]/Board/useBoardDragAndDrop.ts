@@ -35,7 +35,7 @@ export const useBoardDragAndDrop = () => {
   const [overColumnId, setOverColumnId] = useState<string | null>(null);
   const [activeColumnId, setActiveColumnId] = useState<string | null>(null);
   const [activeTask, setActiveTask] = useState<ITaskWithOptions | null>(null);
-  const [isUpdating, setIsUpdating] = useState(false);
+  const [isUpdating] = useState(false);
   const { user } = useCurrentUser();
   const { createActivity } = useActivityQueries(activeTask?.id as string);
 
@@ -281,7 +281,7 @@ export const useBoardDragAndDrop = () => {
 
   // Handle task movement to an empty column
   const handleEmptyColumnDrag = async (context: DragTaskContext) => {
-    const { tasks, setTasks, active, activeId, overId, overColumnId } = context;
+    const { tasks, setTasks, activeId, overColumnId } = context;
 
     const activeIndex = tasks.findIndex((item) => item.id === activeId);
     tasks[activeIndex].statusPosition = 10000;
@@ -375,7 +375,7 @@ export const useBoardDragAndDrop = () => {
   };
 
   const handleNonPriorityColumnDrag = async (context: DragTaskContext) => {
-    const { tasks, setTasks, active, activeId, overColumnId } = context;
+    const { tasks, setTasks, activeId, overColumnId } = context;
     const columnTasks = tasks.filter((task) => task.status_id === overColumnId);
 
     const lastTaskIndex = columnTasks.length - 1;

@@ -23,7 +23,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
-import { ReactNode } from "react";
+import { JSX, ReactNode } from "react";
 
 const navigationItems: (
   | "separator"
