@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { auth } from "@/utils/auth";
 import { getAuthError } from "@/utils/auth-errors";
 import { toast } from "sonner";
+import { AuthError } from "@supabase/supabase-js";
 
 interface Props {
   redirectUrl?: string;
@@ -19,7 +20,7 @@ function OAuthButtons({ redirectUrl }: Props) {
       setIsLoading(true);
       await auth.signInWithOAuth(provider, nextUrl);
     } catch (error) {
-      const { message } = getAuthError(error);
+      const { message } = getAuthError(error as AuthError);
       toast.error(message);
     } finally {
       setIsLoading(false);
