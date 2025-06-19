@@ -9,7 +9,10 @@ import {
 } from "@/components/ui/tooltip";
 import { ColumnMenuOptions } from "./ColumnMenuOptions";
 import { tasks as taskUtils } from "@/utils/tasks";
-import { SortableContext } from "@dnd-kit/sortable";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 import { cn } from "@/lib/utils";
 import { UniqueIdentifier } from "@dnd-kit/core";
 import { TaskItem } from "./TaskItem";
@@ -150,6 +153,7 @@ export const ColumnContainer = ({
           ...item,
           id: item.id as UniqueIdentifier,
         }))}
+        strategy={verticalListSortingStrategy}
       >
         <div className={cn("flex-1 overflow-y-auto space-y-2 p-2")}>
           {columnTasks.map((item, index) => (
