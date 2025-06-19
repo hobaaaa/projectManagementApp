@@ -65,7 +65,7 @@ interface IStatus extends IField {
   limit: number;
 }
 
-interface ILabel extends IField {}
+type ILabel = IField;
 interface IPriority extends IField {
   order: number;
 }
@@ -147,6 +147,7 @@ interface ICustomFieldData {
   color?: string;
   description?: string;
   order?: number;
+  [key: string]: unknown;
 }
 
 // tables ----------------
