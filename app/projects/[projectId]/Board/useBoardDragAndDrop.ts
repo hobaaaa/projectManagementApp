@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { useActivityQueries } from "@/hooks/useActivityQueries";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { canMoveTask, moveTaskDown, moveTaskUp } from "@/utils/move-task";

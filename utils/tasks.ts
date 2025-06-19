@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { DateUpdates } from "@/hooks/useTaskQueries";
 import { createClient } from "./supabase/client";
 
