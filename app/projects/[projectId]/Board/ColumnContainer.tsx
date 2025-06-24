@@ -30,6 +30,7 @@ interface Props {
   projectName: string;
   tasks: ITaskWithOptions[];
   column: IStatus;
+  isOver: boolean;
   onColumnHide?: (columnId: string) => void;
   onColumnUpdate?: (column: IStatus) => void;
   onColumnDelete?: (columnId: string) => void;
@@ -41,6 +42,7 @@ export const ColumnContainer = ({
   column,
   tasks: columnTasks,
   projectName,
+  isOver,
   onColumnHide,
   onColumnUpdate,
   onColumnDelete,
@@ -155,7 +157,13 @@ export const ColumnContainer = ({
         }))}
         strategy={verticalListSortingStrategy}
       >
-        <div className={cn("flex-1 overflow-y-auto space-y-2 p-2")}>
+        <div
+          className={cn(
+            "flex-1 overflow-y-auto space-y-2 p-2",
+            isOver &&
+              "bg-gray-200 dark:bg-gray-900 border border-dashed border-gray-400 dark:border-gray-600"
+          )}
+        >
           {columnTasks.map((item, index) => (
             <TaskItem
               key={item.id}

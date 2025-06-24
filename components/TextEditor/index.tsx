@@ -19,6 +19,7 @@ interface Props {
   content: string;
   onChange?: (content: string) => void;
   resetKey?: number;
+  users?: IUser[];
 }
 export const TextEditor = ({
   isEditable = false,

@@ -11,10 +11,12 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useProjectQueries } from "@/hooks/useProjectQueries";
 import { getColumnSortedTasks, sortTasks } from "@/utils/sort";
-import { DndContext, DragOverlay, DragStartEvent } from "@dnd-kit/core";
+import { closestCorners, DndContext, DragOverlay } from "@dnd-kit/core";
 import { TaskItem } from "./TaskItem";
 import { createPortal } from "react-dom";
 import { TaskDetailsProvider } from "./TaskDetailsContext";
+import { useBoardDragAndDrop } from "./useBoardDragAndDrop";
+import { TaskDetailsDrawer } from "./TaskDetailsDrawer";
 
 interface Props {
   projectId: string;
@@ -35,8 +37,14 @@ export const Board: React.FC<Props> = ({
   const { projectTasks, reloadProjectTasks } = useProjectQueries(projectId);
 
   const [tasks, setTasks] = useState<ITaskWithOptions[]>(projectTasks || []);
-
-  const [activeTask, setActiveTask] = useState<ITaskWithOptions | null>(null);
+  const {
+    activeTask,
+    sensors,
+    overColumnId,
+    handleDragStart,
+    handleDragEnd,
+    handleDragOver,
+  } = useBoardDragAndDrop();
 
   useEffect(() => {
     setTasks(projectTasks || []);
@@ -84,12 +92,6 @@ export const Board: React.FC<Props> = ({
 
   const handleShowHiddenColumns = () => {
     setHiddenColumns(new Set());
-  };
-  const handleDragStart = (event: DragStartEvent) => {
-    if (event.active.data.current?.type === "task") {
-      setActiveTask(event.active.data.current?.task);
-      return;
-    }
   };
 
   const handleTaskUpdate = async (
@@ -142,7 +144,13 @@ export const Board: React.FC<Props> = ({
                 : "h-[calc(100vh-155px)]"
             )}
           >
-            <DndContext onDragStart={handleDragStart}>
+            <DndContext
+              onDragStart={handleDragStart}
+              onDragEnd={(event) => handleDragEnd(event, sortedTasks, setTasks)}
+              onDragOver={(event) => handleDragOver(event)}
+              sensors={sensors}
+              collisionDetection={closestCorners}
+            >
               {visibleColumns.map((status) => (
                 <ColumnContainer
                   key={status.id}
@@ -155,6 +163,7 @@ export const Board: React.FC<Props> = ({
                   onColumnDelete={handleColumnDelete}
                   onTaskCreated={handleTaskCreated}
                   hasMinRole={hasMinRole}
+                  isOver={overColumnId === status.id}
                 />
               ))}
 
@@ -185,6 +194,7 @@ export const Board: React.FC<Props> = ({
               </Button>
             }
           />
+          <TaskDetailsDrawer />
         </div>
       </div>
     </TaskDetailsProvider>

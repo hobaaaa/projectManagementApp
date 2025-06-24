@@ -1,6 +1,6 @@
 "use client";
 import { CustomFieldTagRenderer } from "@/components/CustomFieldTagRenderer";
-import { LabelBadge } from "@/components/Label/LabelBadge";
+import { LabelBadge } from "@/components/LabelBadge";
 import StackedAvatars from "@/components/StackedAvatars";
 import { prefetchTask } from "@/hooks/useTaskQueries";
 import { UniqueIdentifier } from "@dnd-kit/core";
@@ -17,9 +17,7 @@ interface Props {
 
 export const TaskItem = ({ item, projectName, index }: Props) => {
   const queryClient = useQueryClient();
-
   const { openDrawer } = useTaskDetails();
-
   const {
     attributes,
     listeners,
@@ -29,12 +27,17 @@ export const TaskItem = ({ item, projectName, index }: Props) => {
     isDragging,
   } = useSortable({
     id: item.id as UniqueIdentifier,
-    data: { type: "task", task: item, position: index },
+    data: {
+      type: "task",
+      task: item,
+      position: index,
+    },
   });
   const style = {
     transform: CSS.Translate.toString(transform),
     transition,
   };
+
   const handleClick = async () => {
     // Prefetch task data before opening drawer
     await prefetchTask(queryClient, item.id!);
@@ -50,6 +53,7 @@ export const TaskItem = ({ item, projectName, index }: Props) => {
       />
     );
   }
+
   return (
     <>
       <div
