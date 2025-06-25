@@ -25,7 +25,7 @@ export const TaskDetailsDrawer = () => {
   return (
     <Sheet open={isDrawerOpen} onOpenChange={(open) => !open && closeDrawer()}>
       <SheetContent className="min-w-full sm:min-w-[550px] md:min-w-[750px] lg:min-w-[70%] dark:bg-gray-950 overflow-y-auto">
-        <SheetHeader className="py-4">
+        <SheetHeader className="py-4 mt-4">
           <SheetTitle className="flex items-center justify-between py-2">
             <HeaderSection
               title={selectedTask.title || ""}

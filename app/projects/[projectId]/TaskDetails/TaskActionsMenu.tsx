@@ -2,14 +2,12 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
 import { useProjectQueries } from "@/hooks/useProjectQueries";
 import { useTaskQueries } from "@/hooks/useTaskQueries";
-import { Check, Copy, Ellipsis, ExternalLink, Pen, Trash } from "lucide-react";
-import Link from "next/link";
+import { Check, Copy, Ellipsis, Pen, Trash } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 import { useTaskDetails } from "../Board/TaskDetailsContext";
@@ -62,13 +60,7 @@ export const TaskActionsMenu = ({ permalink, setIsEditing }: Props) => {
             )}
           </DropdownMenuItem>
         </div>
-        <Link href={permalink} target="_blank" rel="noreferrer">
-          <DropdownMenuItem>
-            <ExternalLink className="w-4 h-4 mr-2" />
-            Open in new tab
-          </DropdownMenuItem>
-        </Link>
-        <DropdownMenuSeparator />
+
         <DropdownMenuItem
           onClick={handleDelete}
           disabled={isDeleting}
